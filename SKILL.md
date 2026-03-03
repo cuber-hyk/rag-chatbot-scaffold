@@ -5,109 +5,98 @@ description: Generate a complete RAG chatbot project with three-layer architectu
 
 # RAG Chatbot Scaffold
 
-Fast generation of production-ready RAG chatbot projects with enterprise-grade architecture.
+Instant generation of production-ready RAG chatbot projects with enterprise-grade architecture.
 
 ## Overview
 
-This Skill generates a complete RAG chatbot project with:
+This Skill generates a complete RAG chatbot project with sensible defaults:
 - **Three-layer architecture**: API → Service → Repository
-- **Multi-vector database**: Qdrant, Weaviate, Pinecone with plugin interface
-- **Multi-LLM provider**: OpenAI, Anthropic, SiliconCloud, Azure with preset templates
-- **Document parsing**: PDF, Markdown, Word, Plain Text
-- **API Key authentication**
+- **Multi-vector database**: Weaviate (default), Qdrant, Pinecone
+- **Multi-LLM provider**: OpenAI, Anthropic, Azure (with SiliconCloud support)
+- **Document parsing**: PDF, Markdown, Word, Plain Text via LangChain
+- **Document deduplication**: Smart duplicate detection with conflict handling
 - **Redis session management**
-- **Network search**: DuckDuckGo, Tavily
-- **Configuration**: YAML + .env
-- **Dynamic generation**: Placeholder substitution based on user config
+- **Network search**: DuckDuckGo (free), Tavily (optional)
+- **API Key authentication**: Simple and secure
 
 ## Quick Start
 
-1. Copy project configuration template:
+**Just use the skill!** The project will be generated with sensible defaults:
+
+```bash
+# Run this in Claude Code
+/skill
+```
+
+The skill will create a complete project with:
+- Project name: `my-rag-chatbot` (you can rename later)
+- Vector DB: Weaviate (http://localhost:8080)
+- LLM: OpenAI-compatible (configurable base URL)
+- Embedding: BAAI/bge-large-zh-v1.5
+- Search: DuckDuckGo (no API key needed)
+
+## After Generation
+
+1. **Navigate to the project**:
    ```bash
-   cp project_config.yaml.example my_project_config.yaml
+   cd my-rag-chatbot
    ```
 
-2. Edit `my_project_config.yaml` with your preferences:
-   ```yaml
-   project:
-     name: my-chatbot
-     description: "My RAG chatbot"
-     version: "0.1.0"
-
-   api:
-     host: "0.0.0.0"
-     port: 8000
-     version_prefix: "v1"
-
-   vector_db:
-     provider: qdrant      # or weaviate, pinecone
-     collection_name: documents
-
-   llm:
-     provider: openai      # or anthropic, siliconcloud, azure
-     temperature: 0.7
-     max_tokens: 2048
-
-   search:
-     provider: duckduckgo   # or tavily
-     max_results: 5
-   ```
-
-3. Run the project generator:
+2. **Configure API keys**:
    ```bash
-   python scripts/generate_project.py my_project_config.yaml
+   cp .env.example .env
+   # Edit .env with your API keys
    ```
 
-The generator will:
-- Create the project directory structure
-- Generate `config/config.yaml` with your settings
-- Copy appropriate LLM and Vector DB config files
-- Substitute placeholders in templates with your values
+3. **Install dependencies**:
+   ```bash
+   python -m venv .venv
+   .venv\\Scripts\\activate  # Windows
+   pip install -r requirements.txt
+   ```
 
-## Instructions
+4. **Run the server**:
+   ```bash
+   python main.py
+   ```
 
-### Step 1: Prepare Project Configuration
+## Customization
 
-The project is generated from a configuration file (`project_config.yaml`). You define:
-- Project metadata (name, description, version)
-- Vector database choice and settings
-- LLM provider and model settings
-- Search tool configuration
-- Session and authentication settings
-- Document parsing settings
+After generation, you can modify settings in:
 
-### Step 2: Configure Environment Variables
+### `config/providers.yaml` - Provider Selection
+```yaml
+llm:
+  provider: openai           # openai, anthropic, azure
+  base_url: https://api.siliconflow.cn/v1  # For SiliconCloud
+  model: gpt-4o
 
-The generated project includes a `.env.example` file. Copy it and configure:
-```bash
-cd <project_name>
-cp .env.example .env
-# Edit .env with your API keys
+vector_db:
+  provider: weaviate        # weaviate, qdrant, pinecone
 ```
 
-Required environment variables depend on your choices:
-- **LLM**: `OPENAI_API_KEY`, `ANTHROPIC_API_KEY`, `SILICONCLOUD_API_KEY`, etc.
-- **Vector DB**: `QDRANT_URL`, `WEAVIATE_URL`, `PINECONE_API_KEY`, etc.
-- **Session**: `REDIS_URL`
-- **Search**: `TAVILY_API_KEY` (if using Tavily)
-- **Auth**: `API_KEY` (if using API Key authentication)
-
-### Step 3: Install Dependencies
-
-```bash
-cd <project_name>
-python -m venv .venv
-source .venv/bin/activate  # On Windows: .venv\Scripts\activate
-pip install -r requirements.txt
+### `.env` - API Keys
+```env
+OPENAI_API_KEY=sk-xxx
+API_KEY=  # Leave empty to disable auth
 ```
 
-### Step 4: Start Development Server
+## Configuration Options
 
-```bash
-python main.py
-```
+### Vector Database
+- **weaviate** (default): Local or cloud, Weaviate v4 client
+- **qdrant**: Local or remote Qdrant
+- **pinecone**: Cloud-based Pinecone
 
-The API will be available at `http://{host}:{port}` (from your config)
+### LLM Providers
+- **openai** (default): GPT models via OpenAI API
+- **anthropic**: Claude models via Anthropic API
+- **azure**: Azure OpenAI
+- **siliconcloud/moonshot**: Use `openai` provider with custom `base_url`
+
+### Search Tools
+- **duckduckgo** (default): Free, no API key required
+- **tavily**: High-quality search, requires `TAVILY_API_KEY`
 
 ## Project Structure
 
@@ -199,126 +188,37 @@ Implementations:
 - `WeaviateRepository`: Weaviate backend
 - `PineconeRepository`: Pinecone backend
 
-## Configuration System
+## Configuration
 
-The project uses a two-tier configuration system with **flat field structure**:
+The generated project uses a **three-file configuration structure**:
 
-### 1. config/config.yaml (Flat Structure)
-- Contains all non-sensitive configuration
-- Uses **flat field names** that directly map to `Settings` class fields
-- Generated from user's `project_config.yaml`
-- Settings class loads this file at startup
+### config/application.yaml
+Application settings (project info, API, documents, features)
 
-Example:
-```yaml
-# Flat structure - matches Settings class fields
-project_name: my-chatbot
-project_description: A RAG chatbot
-version: 0.1.0
-api_host: 0.0.0.0
-api_port: 8000
-vector_db_provider: qdrant
-llm_provider: openai
-```
+### config/providers.yaml
+Provider selection and connections (LLM, embedding, vector DB, search)
 
-### 2. .env
-- Contains sensitive data (API keys)
-- Loaded by pydantic-settings BaseSettings
-- Values from .env override defaults from config.yaml
+### config/prompts.yaml
+System prompts for the chatbot
 
-### Important: Flat vs Nested Structure
+### .env
+API keys (never committed to git)
 
-The `config/config.yaml` **must use flat field names**, not nested structure:
+### Configuration Priority
+1. Defaults from Settings class
+2. application.yaml / providers.yaml values
+3. .env overrides (for API keys only)
 
-```yaml
-# ✅ CORRECT - Flat structure
-project_name: my-chatbot
-api_port: 8000
+## Weaviate v4 Client
 
-# ❌ INCORRECT - Nested structure (won't work)
-project:
-  name: my-chatbot
-api:
-  port: 8000
-```
-
-This is because the `Settings` class uses `Settings(**config_dict)` to load the YAML, and nested structures won't map correctly to the class fields.
-
-### Configuration Hierarchy
-
-1. **Defaults**: From `Settings` class Field(default=...)
-2. **config.yaml**: Overrides defaults (flat structure required)
-3. **.env**: Overrides both above (for sensitive data)
-
-This separation allows:
-- Safe git commits (exclude .env with .gitignore)
-- Environment-specific overrides (dev/staging/prod)
-- No IDE warnings (config values are loaded at runtime)
-
-## Weaviate v4 Client API
-
-The scaffold uses **Weaviate Python Client v4**. Key API differences from v3:
-
+The scaffold uses **Weaviate Python Client v4** with correct imports:
 ```python
-# Connection
-client = weaviate.connect_to_local(host="localhost", port=8080)
-
-# Delete collection
-if client.collections.exists("collection_name"):
-    client.collections.delete("collection_name")
-
-# Health check
-client.is_ready()  # v4 (was is_live() in v3)
-
-# Close connection
-client.close()
+from weaviate.classes.config import Configure, Property, DataType
 ```
 
-When adding Weaviate support, ensure `weaviate-client>=4.0.0` is in requirements.txt.
+## Adding New Features
 
-## Adding New Vector Database Support
-
-1. Create a new repository class in `src/repositories/` inheriting from `VectorRepository`
-2. Add configuration to `config/vector_db/<name>.yaml` in the skill
-3. Register in `src/api/dependencies.py` (add new elif branch)
-4. Add dependency in `requirements.txt`
-
-See `config/qdrant.yaml` as a reference.
-
-## Adding New LLM Provider
-
-1. Create configuration in `llm/<provider>.yaml` in the skill
-2. Add fields to `src/core/config/settings.py`
-3. Add required packages to `requirements.txt`
-
-See `llm/openai.yaml` as a reference.
-
-## Adding New Document Format
-
-1. Create parser in `src/parsers/{format}_parser.py`
-2. Inherit from `BaseDocumentParser`
-3. Implement `parse_from_file()` using LangChain document loaders
-4. Register in `DocumentParserFactory._parsers` mapping
-5. Add required packages to `requirements.txt`
-
-Example using LangChain loader:
-
-```python
-from typing import List
-from langchain_core.documents import Document
-from langchain_community.document_loaders import YourLoader
-from .base import BaseDocumentParser
-
-class YourFormatParser(BaseDocumentParser):
-    def parse_from_file(self, file_path: str) -> List[Document]:
-        loader = YourLoader(file_path)
-        documents = loader.load()
-        return self._split_documents(documents)
-```
-
-## Document Service
-
-The `DocumentService` uses LangChain parsers for document processing:
+For extending the scaffold with new features, refer to the generated project's inline documentation.
 
 ### Process Uploaded File (bytes)
 
