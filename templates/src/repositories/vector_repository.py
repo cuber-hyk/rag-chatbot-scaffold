@@ -5,7 +5,7 @@ Abstract base class for vector database operations.
 """
 
 from abc import ABC, abstractmethod
-from typing import List, Optional
+from typing import List, Optional, Dict, Any
 from langchain_core.documents import Document
 from .base import BaseRepository
 
@@ -69,3 +69,37 @@ class VectorRepository(BaseRepository):
     async def health_check(self) -> bool:
         """Check if vector database is healthy"""
         return True
+
+    async def find_by_filename(
+        self,
+        filename: str,
+        collection_name: str
+    ) -> Optional[Dict[str, Any]]:
+        """
+        Find a document by filename
+
+        Args:
+            filename: Document filename
+            collection_name: Name of the collection
+
+        Returns:
+            Document info dict with document_id, filename, content_hash, etc. or None
+        """
+        return None
+
+    async def find_by_content_hash(
+        self,
+        content_hash: str,
+        collection_name: str
+    ) -> Optional[Dict[str, Any]]:
+        """
+        Find a document by content hash
+
+        Args:
+            content_hash: SHA256 hash of document content
+            collection_name: Name of the collection
+
+        Returns:
+            Document info dict with document_id, filename, content_hash, etc. or None
+        """
+        return None
