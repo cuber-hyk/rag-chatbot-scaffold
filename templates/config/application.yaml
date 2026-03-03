@@ -7,7 +7,7 @@ project:
   name: my-rag-chatbot
   description: A RAG-based chatbot with vector database support
   version: 0.1.0
-  environment: development  # development, staging, production
+  environment: development # development, staging, production
 
 # ============== API Server ==============
 api:
@@ -28,11 +28,11 @@ api:
 # ============== Session Management ==============
 session:
   # Session storage backend
-  storage: redis  # redis, memory (memory is for development only)
+  storage: redis # redis, memory (memory is for development only)
 
   # Redis connection (from .env: REDIS_URL)
   # Default: redis://localhost:6379
-  ttl: 300  # Session TTL in seconds (5 minutes)
+  ttl: 86400 # Session TTL in seconds (5 minutes)
 
 # ============== Document Processing ==============
 documents:
@@ -53,8 +53,8 @@ documents:
 
 # ============== Logging ==============
 logging:
-  level: INFO  # DEBUG, INFO, WARNING, ERROR, CRITICAL
-  format: text  # text, json
+  level: INFO # DEBUG, INFO, WARNING, ERROR, CRITICAL
+  format: text # text, json
 
   # Output targets
   console: true

@@ -44,8 +44,10 @@ class WeaviateRepository(VectorRepository):
         # Connect using v4 client
         if api_key and api_key.strip() and api_key.lower() != "none":
             self._client = weaviate.connect_to_local(
-                host=host, port=port, grpc_port=50051,
-                auth_credentials=AuthApiKey(api_key)
+                host=host,
+                port=port,
+                grpc_port=50051,
+                auth_credentials=AuthApiKey(api_key),
             )
         else:
             self._client = weaviate.connect_to_local(
@@ -53,10 +55,7 @@ class WeaviateRepository(VectorRepository):
             )
 
     async def add_documents(
-        self,
-        documents: List[Document],
-        collection_name: str,
-        **kwargs
+        self, documents: List[Document], collection_name: str, **kwargs
     ) -> int:
         """Add documents to Weaviate using v4 API"""
         if not self._client:
@@ -73,7 +72,7 @@ class WeaviateRepository(VectorRepository):
                     Property(name="chunk_index", data_type=DataType.INT),
                     Property(name="content_hash", data_type=DataType.TEXT),
                 ],
-                vectorizer_config=Configure.Vectorizer.none()
+                vectorizer_config=Configure.Vectorizer.none(),
             )
 
         # Get embedding function
@@ -96,19 +95,12 @@ class WeaviateRepository(VectorRepository):
                     "content_hash": doc.metadata.get("content_hash", ""),
                 }
 
-                batch.add_object(
-                    properties=properties,
-                    vector=embedding
-                )
+                batch.add_object(properties=properties, vector=embedding)
 
         return len(documents)
 
     async def search(
-        self,
-        query: str,
-        collection_name: str,
-        top_k: int = 5,
-        **kwargs
+        self, query: str, collection_name: str, top_k: int = 5, **kwargs
     ) -> List[Document]:
         """Search in Weaviate using v4 API"""
         if not self._client:
@@ -122,19 +114,15 @@ class WeaviateRepository(VectorRepository):
         query_vector = embedding_func(query)
 
         # Search
-        results = collection.query.near_vector(
-            near_vector=query_vector,
-            limit=top_k
-        )
+        results = collection.query.near_vector(near_vector=query_vector, limit=top_k)
 
         # Convert to LangChain Documents
         documents = []
         for obj in results.objects:
             props = obj.properties
-            documents.append(Document(
-                page_content=props.get("text", ""),
-                metadata=props
-            ))
+            documents.append(
+                Document(page_content=props.get("text", ""), metadata=props)
+            )
 
         return documents
 
@@ -258,9 +246,7 @@ class WeaviateRepository(VectorRepository):
             return False
 
     async def get_document_chunks(
-        self,
-        document_id: str,
-        collection_name: str
+        self, document_id: str, collection_name: str
     ) -> List[Document]:
         """
         Get all chunks for a specific document
@@ -288,10 +274,7 @@ class WeaviateRepository(VectorRepository):
                     # For LangChain Weaviate, it's typically in "text" or similar
                     text_content = props.get("text", "")
 
-                    chunks.append(Document(
-                        page_content=text_content,
-                        metadata=props
-                    ))
+                    chunks.append(Document(page_content=text_content, metadata=props))
 
             return chunks
 
@@ -346,10 +329,11 @@ class WeaviateRepository(VectorRepository):
     def _get_embedding(self):
         """Get embedding model instance"""
         from langchain_openai import OpenAIEmbeddings
+
         return OpenAIEmbeddings(
             model=self.settings.embedding_model,
             api_key=self._llm_config._get_api_key(),
-            base_url=self.settings.embedding_base_url
+            base_url=self.settings.embedding_base_url,
         )
 
     async def find_by_filename(
