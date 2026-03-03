@@ -33,7 +33,16 @@ async def _duckduckgo_search(query: str, max_results: int) -> str:
     from langchain_community.tools import DuckDuckGoSearchResults
 
     search_engine = DuckDuckGoSearchResults(max_results=max_results)
-    return search_engine.invoke(query)
+    results = search_engine.invoke(query)
+
+    # Format results
+    formatted = []
+    for i, result in enumerate(results[:max_results], 1):
+        formatted.append(f"{i}. {result.get('title', 'N/A')}")
+        formatted.append(f"   {result.get('link', 'N/A')}")
+        formatted.append(f"   {result.get('snippet', 'N/A')}")
+
+    return "\n".join(formatted) if formatted else "No results found"
 
 
 async def _tavily_search(query: str, max_results: int) -> str:
