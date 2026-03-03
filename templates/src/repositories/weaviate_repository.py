@@ -177,7 +177,7 @@ class WeaviateRepository(VectorRepository):
             collection_name: Name of the collection
 
         Returns:
-            List of document summaries with document_id, filename, chunk_count
+            List of document summaries with document_id, filename, chunk_count, content_hash
         """
         if not self._client:
             await self.initialize()
@@ -199,6 +199,7 @@ class WeaviateRepository(VectorRepository):
                             "document_id": doc_id,
                             "filename": props.get("filename", "unknown"),
                             "chunk_count": 0,
+                            "content_hash": props.get("content_hash"),
                         }
                     documents_map[doc_id]["chunk_count"] += 1
 
@@ -337,9 +338,7 @@ class WeaviateRepository(VectorRepository):
         )
 
     async def find_by_filename(
-        self,
-        filename: str,
-        collection_name: str
+        self, filename: str, collection_name: str
     ) -> Optional[Dict[str, Any]]:
         """Find a document by filename"""
         if not self._client:
@@ -363,9 +362,7 @@ class WeaviateRepository(VectorRepository):
             return None
 
     async def find_by_content_hash(
-        self,
-        content_hash: str,
-        collection_name: str
+        self, content_hash: str, collection_name: str
     ) -> Optional[Dict[str, Any]]:
         """Find a document by content hash"""
         if not self._client:

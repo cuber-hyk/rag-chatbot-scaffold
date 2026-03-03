@@ -4,7 +4,6 @@ Document Schemas
 
 from pydantic import BaseModel, Field
 from typing import List, Optional, Literal
-from datetime import datetime
 
 
 class DocumentUploadResponse(BaseModel):
@@ -21,9 +20,8 @@ class DocumentInfo(BaseModel):
     """Document information"""
     document_id: str
     filename: str
-    content_type: str
     chunk_count: int
-    uploaded_at: datetime
+    content_hash: Optional[str] = None
 
 
 class DocumentListResponse(BaseModel):
