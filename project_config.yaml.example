@@ -1,5 +1,25 @@
-# RAG Chatbot Project Configuration
-# Copy this file to your_project_config.yaml and modify as needed
+# ============================================================
+# RAG Chatbot Project Configuration (OPTIONAL)
+# ============================================================
+#
+# This file is OPTIONAL for advanced customization.
+#
+# QUICK START:
+#   Just run `/skill` in Claude Code - no configuration needed!
+#   The project will be generated with sensible defaults.
+#
+# ADVANCED USAGE:
+#   If you want to customize before generation:
+#   1. Copy this file to: my_custom_config.yaml
+#   2. Modify the settings below
+#   3. Run: python scripts/generate_project.py my_custom_config.yaml
+#
+# ALTERNATIVE:
+#   Generate the project first, then edit:
+#   - config/application.yaml (application settings)
+#   - config/providers.yaml (provider settings)
+#
+# ============================================================
 
 project:
   # Project name (will be used as directory name)
