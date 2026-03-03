@@ -71,6 +71,7 @@ class WeaviateRepository(VectorRepository):
                     Property(name="document_id", data_type=DataType.TEXT),
                     Property(name="filename", data_type=DataType.TEXT),
                     Property(name="chunk_index", data_type=DataType.INT),
+                    Property(name="content_hash", data_type=DataType.TEXT),
                 ],
                 vectorizer_config=Configure.Vectorizer.none()
             )
