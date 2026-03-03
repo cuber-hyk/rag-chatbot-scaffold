@@ -1,0 +1,16 @@
+# DuckDuckGo Search Configuration
+
+duckduckgo:
+  # No API key required
+
+  # Search settings
+  max_results: 5
+
+  # Time range: d, w, m, y (day, week, month, year)
+  time: null
+
+  # Region: us-en-us, uk-en-en, etc.
+  region: null
+
+  # Safe search: on, moderate, off
+  safe_search: moderate

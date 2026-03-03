@@ -1,0 +1,78 @@
+# RAG Chatbot - Application Configuration
+# This file contains application-level settings only
+# No sensitive data (API keys) should be stored here
+
+# ============== Project Information ==============
+project:
+  name: my-rag-chatbot
+  description: A RAG-based chatbot with vector database support
+  version: 0.1.0
+  environment: development  # development, staging, production
+
+# ============== API Server ==============
+api:
+  host: 0.0.0.0
+  port: 8000
+  version_prefix: v1
+
+  # CORS settings
+  cors:
+    enabled: true
+    origins:
+      - http://localhost:5173
+      - http://localhost:5174
+    allow_credentials: true
+    allow_methods: ["*"]
+    allow_headers: ["*"]
+
+# ============== Session Management ==============
+session:
+  # Session storage backend
+  storage: redis  # redis, memory (memory is for development only)
+
+  # Redis connection (from .env: REDIS_URL)
+  # Default: redis://localhost:6379
+  ttl: 300  # Session TTL in seconds (5 minutes)
+
+# ============== Document Processing ==============
+documents:
+  # Supported file formats
+  formats:
+    - pdf
+    - markdown
+    - word
+    - text
+
+  # File size limit
+  max_file_size_mb: 10
+
+  # Text splitting (for chunking before vectorization)
+  chunk_size: 1000
+  chunk_overlap: 200
+
+# ============== Logging ==============
+logging:
+  level: INFO  # DEBUG, INFO, WARNING, ERROR, CRITICAL
+  format: text  # text, json
+
+  # Output targets
+  console: true
+  file: false
+  file_path: logs/app.log
+
+# ============== Features ==============
+features:
+  # Enable WebSocket for real-time chat
+  websocket: false
+
+  # Enable streaming responses
+  streaming: true
+
+  # Enable document upload API
+  document_upload: true
+
+  # Enable session management API
+  session_api: true
+
+  # Enable health check endpoint
+  health_check: true

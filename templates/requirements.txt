@@ -1,0 +1,44 @@
+# {project_name} - Dependencies
+
+# Web Framework
+fastapi>=0.115.0
+uvicorn>=0.41.0
+python-multipart>=0.0.6
+
+# Configuration
+pydantic>=2.0.0
+pydantic-settings>=2.0.0
+python-dotenv>=1.2.0
+pyyaml>=6.0.0
+
+# LangChain
+langchain>=1.2.0
+langchain-core>=1.2.0
+langchain-openai>=1.1.0
+langchain-community>=0.4.0
+langchain-text-splitters>=1.1.0
+
+# Session Storage
+redis>=7.1.0
+
+# Checkpoint Storage
+langgraph-checkpoint-redis>=0.3.5
+
+# Vector Databases
+qdrant-client>=1.17.0
+weaviate-client>=4.0.0  # Weaviate v4 Python client
+pinecone-client>=5.0.0  # For Qdrant, Weaviate, Pinecone vector stores
+
+# Document Parsing
+pypdf>=6.7.0
+docx2txt>=0.8
+beautifulsoup4>=4.14.0
+
+# Search Tools
+duckduckgo-search>=8.1.0
+tavily-python>=0.5.0
+# ddgs>=9.10.0  # Alternative to duckduckgo-search
+
+# Utilities
+httpx>=0.28.0
+aiofiles>=24.0.0

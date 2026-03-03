@@ -1,0 +1,39 @@
+# Anthropic LLM Configuration
+
+anthropic:
+  # API Base URL (default: https://api.anthropic.com)
+  base_url: "https://api.anthropic.com"
+
+  # Environment variable for API key
+  api_key_env: "ANTHROPIC_API_KEY"
+
+  # Model presets
+  presets:
+    default_chat:
+      model_id: "claude-sonnet-4-6"
+      type: "chat"
+      temperature: 0.7
+      max_tokens: 2048
+      timeout: 60
+
+    fast_chat:
+      model_id: "claude-haiku-4-5"
+      type: "chat"
+      temperature: 0.7
+      max_tokens: 1024
+      timeout: 30
+
+    large_chat:
+      model_id: "claude-opus-4-6"
+      type: "chat"
+      temperature: 0.7
+      max_tokens: 4096
+      timeout: 120
+
+  # Fallback models
+  fallback_models:
+    - "claude-haiku-4-5"
+    - "claude-sonnet-4-6"
+
+  # Streaming support
+  streaming: true

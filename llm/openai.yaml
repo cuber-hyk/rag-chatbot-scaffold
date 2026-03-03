@@ -1,0 +1,42 @@
+# OpenAI LLM Configuration
+
+openai:
+  # API Base URL (default: https://api.openai.com/v1)
+  base_url: "https://api.openai.com/v1"
+
+  # Environment variable for API key
+  api_key_env: "OPENAI_API_KEY"
+
+  # Model presets
+  presets:
+    default_chat:
+      model_id: "gpt-4o"
+      type: "chat"
+      temperature: 0.7
+      max_tokens: 2048
+      timeout: 60
+
+    fast_chat:
+      model_id: "gpt-4o-mini"
+      type: "chat"
+      temperature: 0.7
+      max_tokens: 1024
+      timeout: 30
+
+    default_embedding:
+      model_id: "text-embedding-3-small"
+      type: "embedding"
+      embedding_ctx_length: 8191
+
+    large_embedding:
+      model_id: "text-embedding-3-large"
+      type: "embedding"
+      embedding_ctx_length: 8191
+
+  # Fallback models (for error recovery)
+  fallback_models:
+    - "gpt-4o-mini"
+    - "gpt-4-turbo"
+
+  # Streaming support
+  streaming: true

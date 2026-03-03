@@ -1,0 +1,125 @@
+# RAG Chatbot Project Configuration
+# Copy this file to your_project_config.yaml and modify as needed
+
+project:
+  # Project name (will be used as directory name)
+  name: my-rag-chatbot
+
+  # Project description
+  description: "A RAG-based chatbot with vector search and network capabilities"
+
+  # Project version
+  version: "0.1.0"
+
+# Vector Database Configuration
+vector_db:
+  # Choose: qdrant, weaviate, pinecone
+  provider: weaviate
+
+  # Collection name for documents
+  collection_name: documents
+
+  # Embedding model for vector generation
+  embedding_model: text-embedding-3-small
+
+# LLM Provider Configuration
+llm:
+  # Choose: openai, anthropic, siliconcloud, azure
+  provider: openai
+
+  # Model preset (defined in llm/{provider}.yaml)
+  preset: default_chat
+
+  # Temperature (0.0 - 2.0)
+  temperature: 0.7
+
+  # Maximum tokens for generation
+  max_tokens: 2048
+
+# Search Tool Configuration
+search:
+  # Choose: duckduckgo, tavily
+  provider: duckduckgo
+
+  # Maximum results to return
+  max_results: 5
+
+# Session Management
+session:
+  # Session storage: redis (currently only supported)
+  storage: redis
+
+  # Session TTL in seconds (300 = 5 minutes)
+  ttl: 300
+
+  # Enable session persistence
+  persistent: true
+
+# API Configuration
+api:
+  # API host
+  host: "0.0.0.0"
+
+  # API port
+  port: 8000
+
+  # API version prefix
+  version_prefix: "v1"
+
+  # Enable CORS (for development)
+  cors_enabled: true
+
+  # CORS allowed origins
+  cors_origins:
+    - "http://localhost:5173"
+    - "http://localhost:5174"
+
+# Authentication
+# Set API_KEY in .env file to enable authentication
+# Leave empty or set to "none" to disable authentication
+
+# Document Parsing
+documents:
+  # Enable document parsing
+  enabled: true
+
+  # Supported formats: pdf, markdown, word, text
+  formats:
+    - pdf
+    - markdown
+    - word
+    - text
+
+  # Maximum file size in MB
+  max_file_size: 10
+
+  # Chunk size for text splitting
+  chunk_size: 1000
+
+  # Chunk overlap
+  chunk_overlap: 200
+
+# Logging
+logging:
+  # Log level: DEBUG, INFO, WARNING, ERROR, CRITICAL
+  level: INFO
+
+  # Log format: json, text
+  format: text
+
+# Features (enable/disable features)
+features:
+  # Enable WebSocket support for real-time chat
+  websocket: false
+
+  # Enable streaming responses
+  streaming: true
+
+  # Enable document upload
+  document_upload: true
+
+  # Enable session management API
+  session_api: true
+
+  # Enable health check endpoint
+  health_check: true

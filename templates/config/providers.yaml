@@ -1,0 +1,73 @@
+# RAG Chatbot - Provider Configuration
+# This file contains provider selection and connection settings
+# API keys are loaded from .env file
+
+# ============== LLM Provider ==============
+llm:
+  # Supported providers: openai, anthropic, azure
+  # For SiliconCloud/Moonshot: use 'openai' provider with custom base_url
+  provider: openai
+
+  # Model configuration
+  model: Pro/MiniMaxAI/MiniMax-M2.5
+  temperature: 0.7
+  max_tokens: 2048
+
+  # Base URL (use SiliconCloud URL if needed)
+  # SiliconCloud: https://api.siliconflow.cn/v1
+  # Moonshot: https://api.moonshot.cn/v1
+  # OpenAI: https://api.openai.com/v1
+  base_url: https://api.siliconflow.cn/v1
+
+  # Azure-specific (only used when provider: azure)
+  azure_deployment: ""
+  azure_endpoint: ""
+
+# ============== Embedding Model ==============
+embedding:
+  # Use same provider as LLM
+  provider: openai
+  model: BAAI/bge-large-zh-v1.5
+  base_url: https://api.siliconflow.cn/v1
+
+# ============== Vector Database ==============
+vector_db:
+  # Choose provider: weaviate, qdrant, pinecone
+  provider: weaviate
+
+  # Collection name
+  collection: documents
+
+  # Provider-specific settings
+  # Set API key in .env: {PROVIDER}_API_KEY
+  connections:
+    # Weaviate (default - local)
+    weaviate:
+      url: http://localhost:8080
+      # Set in .env: WEAVIATE_API_KEY (for cloud only)
+
+    # Qdrant
+    qdrant:
+      url: http://localhost:6333
+      # Set in .env: QDRANT_API_KEY (for cloud only)
+
+    # Pinecone
+    pinecone:
+      cloud: aws
+      region: us-east-1
+      # Set in .env: PINECONE_API_KEY
+
+# ============== Search Tool ==============
+search:
+  # Choose provider: duckduckgo, tavily
+  provider: duckduckgo
+
+  # Search settings
+  max_results: 5
+
+  # Tavily-specific
+  # Set in .env: TAVILY_API_KEY
+  tavily:
+    search_depth: basic
+    include_answer: true
+    include_raw_content: false
