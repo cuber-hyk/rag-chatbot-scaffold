@@ -11,6 +11,7 @@
 - **Network Search**: Real-time information retrieval via web search
 - **Multi-LLM Support**: Compatible with OpenAI, Anthropic, SiliconCloud, and Azure
 - **Multi-Vector DB**: Supports Qdrant, Weaviate, and Pinecone
+- **Document Deduplication**: Smart duplicate detection with conflict handling
 - **Session Management**: Conversation history via Redis
 - **Document Parsing**: Support for PDF, Markdown, Word, and Plain Text
 
@@ -93,6 +94,40 @@ Response: { "response": "string", "thread_id": "string" }
 POST /api/{version_prefix}/documents
 Headers: X-API-Key: <your-api-key>
 Form: file=<document>
+Query: on_conflict=error|replace|skip
+
+# on_conflict options:
+# - error (default): Return conflict info
+# - replace: Delete existing and replace
+# - skip: Skip upload if duplicate exists
+```
+
+**Response (Success):**
+```json
+{
+  "success": true,
+  "document_id": "uuid-123",
+  "chunks_added": 10,
+  "message": "Document processed successfully"
+}
+```
+
+**Response (Filename Conflict):**
+```json
+{
+  "success": false,
+  "error": "filename_conflict",
+  "message": "文件名已存在但内容不同。请选择：覆盖或修改文件名"
+}
+```
+
+**Response (Duplicate Content):**
+```json
+{
+  "success": false,
+  "error": "duplicate_content",
+  "message": "文档内容已存在（文件名: other_file.txt）"
+}
 ```
 
 ### Session Management
