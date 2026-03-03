@@ -5,9 +5,10 @@ Handles document upload, parsing, and indexing using LangChain parsers.
 """
 
 import uuid
+import hashlib
 import tempfile
 from pathlib import Path
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Literal
 from langchain_core.documents import Document as LangChainDocument
 from src.repositories.vector_repository import VectorRepository
 from src.parsers import DocumentParserFactory
@@ -36,9 +37,10 @@ class DocumentService:
         content_type: str,
         chunk_size: Optional[int] = None,
         chunk_overlap: Optional[int] = None,
+        on_conflict: Literal["error", "replace", "skip"] = "error",
     ) -> Dict:
         """
-        Process and index a document
+        Process and index a document with deduplication
 
         Args:
             filename: Document filename
@@ -46,18 +48,57 @@ class DocumentService:
             content_type: MIME type
             chunk_size: Override default chunk size
             chunk_overlap: Override default chunk overlap
+            on_conflict: How to handle filename conflicts
+                - "error": Return error info (default)
+                - "replace": Delete old document and replace
+                - "skip": Skip upload if duplicate exists
 
         Returns:
-            Result with document_id and chunks_added
+            Result with document_id, chunks_added, and conflict_info if any
 
         Example:
             >>> result = await document_service.process_document(
             ...     "document.pdf",
             ...     file_content,
-            ...     "application/pdf"
+            ...     "application/pdf",
+            ...     on_conflict="replace"
             ... )
-            >>> print(f"Added {result['chunks_added']} chunks")
         """
+        # Calculate content hash for deduplication
+        content_hash = hashlib.sha256(content).hexdigest()
+
+        # Check for conflicts
+        conflict_info = await self._check_conflicts(filename, content_hash)
+        if conflict_info:
+            # Hash same = exact duplicate content
+            if conflict_info["type"] == "duplicate_content":
+                return {
+                    "success": False,
+                    "error": "duplicate_content",
+                    "message": f"文档 '{filename}' 的内容已存在（文件名: {conflict_info['existing_filename']}）",
+                    "existing_document_id": conflict_info["document_id"],
+                }
+
+            # Filename exists but different content
+            if conflict_info["type"] == "filename_conflict":
+                if on_conflict == "error":
+                    return {
+                        "success": False,
+                        "error": "filename_conflict",
+                        "message": f"文件名 '{filename}' 已存在但内容不同。请选择：覆盖（on_conflict='replace'）或修改文件名",
+                        "existing_document_id": conflict_info["document_id"],
+                    }
+                elif on_conflict == "skip":
+                    return {
+                        "success": False,
+                        "error": "skipped",
+                        "message": f"跳过上传：文件名 '{filename}' 已存在",
+                        "existing_document_id": conflict_info["document_id"],
+                    }
+                elif on_conflict == "replace":
+                    # Delete old document
+                    await self.delete_document(conflict_info["document_id"])
+
         # Check file size
         size_mb = len(content) / (1024 * 1024)
         if size_mb > self.settings.max_file_size_mb:
@@ -105,6 +146,7 @@ class DocumentService:
                     "filename": filename,
                     "chunk_index": i,
                     "chunk_count": total_chunks,
+                    "content_hash": content_hash,
                 }
 
                 # Preserve original metadata from parser
@@ -122,6 +164,7 @@ class DocumentService:
             )
 
             return {
+                "success": True,
                 "document_id": document_id,
                 "chunks_added": chunks_added,
                 "filename": filename,
@@ -309,3 +352,62 @@ class DocumentService:
         return await self.vector_repo.delete_collection(
             self.settings.vector_db_collection
         )
+
+    async def _check_conflicts(
+        self,
+        filename: str,
+        content_hash: str
+    ) -> Optional[Dict[str, str]]:
+        """
+        Check for document conflicts
+
+        Args:
+            filename: Document filename
+            content_hash: SHA256 hash of content
+
+        Returns:
+            None if no conflict, otherwise dict with conflict info:
+            {
+                "type": "filename_conflict" | "duplicate_content",
+                "document_id": "...",
+                "existing_filename": "..."
+            }
+        """
+        # Check if filename already exists
+        existing_by_filename = await self.vector_repo.find_by_filename(
+            filename=filename,
+            collection_name=self.settings.vector_db_collection
+        )
+
+        # Check if content hash already exists
+        existing_by_hash = await self.vector_repo.find_by_content_hash(
+            content_hash=content_hash,
+            collection_name=self.settings.vector_db_collection
+        )
+
+        # Same filename and same hash - exact duplicate
+        if existing_by_filename and existing_by_hash:
+            if existing_by_filename["document_id"] == existing_by_hash["document_id"]:
+                return {
+                    "type": "duplicate_content",
+                    "document_id": existing_by_filename["document_id"],
+                    "existing_filename": existing_by_filename["filename"],
+                }
+
+        # Same filename but different content
+        if existing_by_filename:
+            return {
+                "type": "filename_conflict",
+                "document_id": existing_by_filename["document_id"],
+                "existing_filename": existing_by_filename["filename"],
+            }
+
+        # Different filename but same content
+        if existing_by_hash:
+            return {
+                "type": "duplicate_content",
+                "document_id": existing_by_hash["document_id"],
+                "existing_filename": existing_by_hash["filename"],
+            }
+
+        return None

@@ -349,3 +349,55 @@ class WeaviateRepository(VectorRepository):
             api_key=self._llm_config._get_api_key(),
             base_url=self.settings.embedding_base_url
         )
+
+    async def find_by_filename(
+        self,
+        filename: str,
+        collection_name: str
+    ) -> Optional[Dict[str, Any]]:
+        """Find a document by filename"""
+        if not self._client:
+            await self.initialize()
+
+        try:
+            collection = self._client.collections.get(collection_name)
+
+            # Search for document with matching filename
+            for object_data in collection.iterator():
+                props = object_data.properties
+                if props and props.get("filename") == filename:
+                    return {
+                        "document_id": props.get("document_id"),
+                        "filename": props.get("filename"),
+                        "content_hash": props.get("content_hash"),
+                    }
+            return None
+
+        except Exception:
+            return None
+
+    async def find_by_content_hash(
+        self,
+        content_hash: str,
+        collection_name: str
+    ) -> Optional[Dict[str, Any]]:
+        """Find a document by content hash"""
+        if not self._client:
+            await self.initialize()
+
+        try:
+            collection = self._client.collections.get(collection_name)
+
+            # Search for document with matching content_hash
+            for object_data in collection.iterator():
+                props = object_data.properties
+                if props and props.get("content_hash") == content_hash:
+                    return {
+                        "document_id": props.get("document_id"),
+                        "filename": props.get("filename"),
+                        "content_hash": props.get("content_hash"),
+                    }
+            return None
+
+        except Exception:
+            return None
