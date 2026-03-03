@@ -47,8 +47,9 @@ documents:
   max_file_size_mb: 10
 
   # Text splitting (for chunking before vectorization)
-  chunk_size: 1000
-  chunk_overlap: 200
+  # SiliconCloud bge-large-zh-v1.5 has 512 token limit
+  chunk_size: 400
+  chunk_overlap: 50
 
 # ============== Logging ==============
 logging:

@@ -72,7 +72,7 @@ class WeaviateRepository(VectorRepository):
                     Property(name="filename", data_type=DataType.TEXT),
                     Property(name="chunk_index", data_type=DataType.INT),
                 ],
-                vector_config=Configure.Vectorizer.none()
+                vectorizer_config=Configure.Vectorizer.none()
             )
 
         # Get embedding function
