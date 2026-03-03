@@ -5,6 +5,9 @@ Vector Search Tool
 from langchain_core.tools import tool
 from src.core.config.settings import get_settings
 
+# Singleton instance
+_vector_repo = None
+
 
 @tool
 async def vector_search(query: str, top_k: int = 5) -> str:
@@ -18,28 +21,27 @@ async def vector_search(query: str, top_k: int = 5) -> str:
     Returns:
         Relevant document chunks with sources
     """
+    global _vector_repo
     settings = get_settings()
 
-    # Import and create repository directly
-    from src.repositories.weaviate_repository import WeaviateRepository
-    from src.repositories.qdrant_repository import QdrantRepository
-    from src.repositories.pinecone_repository import PineconeRepository
+    # Create repository instance once
+    if _vector_repo is None:
+        from src.repositories.weaviate_repository import WeaviateRepository
+        from src.repositories.qdrant_repository import QdrantRepository
+        from src.repositories.pinecone_repository import PineconeRepository
 
-    # Create repository instance based on settings
-    if settings.vector_db_provider == "weaviate":
-        vector_repo = WeaviateRepository()
-    elif settings.vector_db_provider == "qdrant":
-        vector_repo = QdrantRepository()
-    elif settings.vector_db_provider == "pinecone":
-        vector_repo = PineconeRepository()
-    else:
-        return "Vector database not configured"
+        if settings.vector_db_provider == "weaviate":
+            _vector_repo = WeaviateRepository()
+        elif settings.vector_db_provider == "qdrant":
+            _vector_repo = QdrantRepository()
+        elif settings.vector_db_provider == "pinecone":
+            _vector_repo = PineconeRepository()
+        else:
+            return "Vector database not configured"
 
-    # Initialize if needed
-    if not hasattr(vector_repo, '_client') or vector_repo._client is None:
-        await vector_repo.initialize()
+        await _vector_repo.initialize()
 
-    results = await vector_repo.search(
+    results = await _vector_repo.search(
         query=query,
         collection_name=settings.vector_db_collection,
         top_k=top_k
