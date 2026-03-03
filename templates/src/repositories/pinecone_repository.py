@@ -24,15 +24,11 @@ class PineconeRepository(VectorRepository):
         """Initialize Pinecone connection"""
         if self._store is None:
             from pinecone import Pinecone
-            self._client = Pinecone(
-                api_key=self.settings.pinecone_api_key
-            )
+
+            self._client = Pinecone(api_key=self.settings.pinecone_api_key)
 
     async def add_documents(
-        self,
-        documents: List[Document],
-        collection_name: str,
-        **kwargs
+        self, documents: List[Document], collection_name: str, **kwargs
     ) -> int:
         """
         Add documents to Pinecone
@@ -59,25 +55,21 @@ class PineconeRepository(VectorRepository):
                 metric="cosine",
                 spec=ServerlessSpec(
                     cloud=self.settings.pinecone_cloud,
-                    region=self.settings.pinecone_region
-                )
+                    region=self.settings.pinecone_region,
+                ),
             )
 
         # Add documents
         PineconeVectorStore.from_documents(
             documents=documents,
             index_name=collection_name,
-            embedding=self._get_embedding()
+            embedding=self._get_embedding(),
         )
 
         return len(documents)
 
     async def search(
-        self,
-        query: str,
-        collection_name: str,
-        top_k: int = 5,
-        **kwargs
+        self, query: str, collection_name: str, top_k: int = 5, **kwargs
     ) -> List[Document]:
         """
         Search in Pinecone
@@ -98,15 +90,10 @@ class PineconeRepository(VectorRepository):
 
         # Create vector store
         store = PineconeVectorStore(
-            index_name=collection_name,
-            embedding=self._get_embedding()
+            index_name=collection_name, embedding=self._get_embedding()
         )
 
-        results = await store.asimilarity_search(
-            query=query,
-            k=top_k,
-            **kwargs
-        )
+        results = await store.asimilarity_search(query=query, k=top_k, **kwargs)
 
         return results
 
@@ -149,8 +136,9 @@ class PineconeRepository(VectorRepository):
     def _get_embedding(self):
         """Get embedding model instance"""
         from langchain_openai import OpenAIEmbeddings
+
         return OpenAIEmbeddings(
             model=self.settings.embedding_model,
             openai_api_key=self.settings.openai_api_key,
-            base_url=self.settings.openai_base_url
+            base_url=self.settings.openai_base_url,
         )

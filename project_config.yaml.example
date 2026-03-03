@@ -13,7 +13,7 @@ project:
 
 # Vector Database Configuration
 vector_db:
-  # Choose: qdrant, weaviate, pinecone
+  # Choose: weaviate, qdrant, pinecone
   provider: weaviate
 
   # Collection name for documents
@@ -22,19 +22,34 @@ vector_db:
   # Embedding model for vector generation
   embedding_model: text-embedding-3-small
 
+  # Pinecone specific (if using pinecone)
+  cloud: aws
+  region: us-east-1
+
 # LLM Provider Configuration
 llm:
-  # Choose: openai, anthropic, siliconcloud, azure
+  # Choose: openai, anthropic, azure
+  # For SiliconCloud/Moonshot: use 'openai' provider with custom base_url
   provider: openai
 
-  # Model preset (defined in llm/{provider}.yaml)
-  preset: default_chat
+  # Model name
+  model: gpt-4o
+
+  # Base URL (optional, for OpenAI-compatible APIs)
+  # SiliconCloud: https://api.siliconflow.cn/v1
+  # Moonshot: https://api.moonshot.cn/v1
+  # OpenAI: https://api.openai.com/v1 (default)
+  base_url: https://api.openai.com/v1
 
   # Temperature (0.0 - 2.0)
   temperature: 0.7
 
   # Maximum tokens for generation
   max_tokens: 2048
+
+  # Azure OpenAI specific (if using azure)
+  azure_deployment: ""
+  azure_endpoint: ""
 
 # Search Tool Configuration
 search:
@@ -46,14 +61,8 @@ search:
 
 # Session Management
 session:
-  # Session storage: redis (currently only supported)
-  storage: redis
-
   # Session TTL in seconds (300 = 5 minutes)
   ttl: 300
-
-  # Enable session persistence
-  persistent: true
 
 # API Configuration
 api:
@@ -66,9 +75,6 @@ api:
   # API version prefix
   version_prefix: "v1"
 
-  # Enable CORS (for development)
-  cors_enabled: true
-
   # CORS allowed origins
   cors_origins:
     - "http://localhost:5173"
@@ -80,9 +86,6 @@ api:
 
 # Document Parsing
 documents:
-  # Enable document parsing
-  enabled: true
-
   # Supported formats: pdf, markdown, word, text
   formats:
     - pdf
@@ -94,10 +97,11 @@ documents:
   max_file_size: 10
 
   # Chunk size for text splitting
-  chunk_size: 1000
+  # SiliconCloud bge-large-zh-v1.5 has 512 token limit
+  chunk_size: 400
 
   # Chunk overlap
-  chunk_overlap: 200
+  chunk_overlap: 50
 
 # Logging
 logging:
