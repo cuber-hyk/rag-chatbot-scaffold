@@ -57,7 +57,7 @@ Use these tools to provide accurate, up-to-date responses.""")
                 elif msg["role"] == "assistant":
                     messages.append(AIMessage(content=msg["content"]))
 
-        result = self.agent.invoke({"messages": messages})
+        result = await self.agent.ainvoke({"messages": messages})
         response = result["messages"][-1].content if result["messages"] else ""
 
         await self._update_session(thread_id, query, response)
