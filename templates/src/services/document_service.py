@@ -169,6 +169,7 @@ class DocumentService:
                 "chunks_added": chunks_added,
                 "filename": filename,
                 "content_type": content_type,
+                "message": "Document processed successfully",
             }
 
         finally:
