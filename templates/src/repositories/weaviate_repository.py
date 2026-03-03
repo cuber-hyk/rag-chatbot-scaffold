@@ -93,6 +93,7 @@ class WeaviateRepository(VectorRepository):
                     "document_id": doc.metadata.get("document_id", ""),
                     "filename": doc.metadata.get("filename", ""),
                     "chunk_index": idx,
+                    "content_hash": doc.metadata.get("content_hash", ""),
                 }
 
                 batch.add_object(
