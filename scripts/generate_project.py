@@ -3,6 +3,13 @@ RAG Chatbot Project Generator
 
 Generate a complete RAG chatbot project from configuration file.
 Uses the new configuration structure: application.yaml + providers.yaml + prompts.yaml
+
+If no configuration file is provided, uses sensible defaults:
+- Project name: my-rag-chatbot
+- Vector DB: weaviate (http://localhost:8080)
+- LLM: openai (https://api.openai.com/v1)
+- Embedding: text-embedding-3-small
+- Search: duckduckgo
 """
 
 import argparse
@@ -12,35 +19,98 @@ from pathlib import Path
 from typing import Dict, Any
 
 
+# Default configuration when no config file is provided
+DEFAULT_CONFIG = {
+    'project': {
+        'name': 'my-rag-chatbot',
+        'description': 'A RAG-based chatbot with vector search and network capabilities',
+        'version': '0.1.0'
+    },
+    'vector_db': {
+        'provider': 'weaviate',
+        'collection_name': 'documents',
+        'embedding_model': 'text-embedding-3-small',
+        'cloud': 'aws',
+        'region': 'us-east-1'
+    },
+    'llm': {
+        'provider': 'openai',
+        'model': 'gpt-4o',
+        'base_url': 'https://api.openai.com/v1',
+        'temperature': 0.7,
+        'max_tokens': 2048,
+        'azure_deployment': '',
+        'azure_endpoint': ''
+    },
+    'search': {
+        'provider': 'duckduckgo',
+        'max_results': 5
+    },
+    'session': {
+        'ttl': 300
+    },
+    'api': {
+        'host': '0.0.0.0',
+        'port': 8000,
+        'version_prefix': 'v1',
+        'cors_origins': ['http://localhost:5173', 'http://localhost:5174']
+    },
+    'documents': {
+        'formats': ['pdf', 'markdown', 'word', 'text'],
+        'max_file_size': 10,
+        'chunk_size': 400,
+        'chunk_overlap': 50
+    },
+    'logging': {
+        'level': 'INFO',
+        'format': 'text'
+    },
+    'features': {
+        'websocket': False,
+        'streaming': True,
+        'document_upload': True,
+        'session_api': True,
+        'health_check': True
+    }
+}
+
+
 class ProjectGenerator:
     """Generate RAG chatbot projects from configuration"""
 
-    def __init__(self, config_path: str):
-        self.config_path = Path(config_path)
-        self.config = self._load_config()
+    def __init__(self, config: Dict[str, Any] = None, config_path: str = None):
+        """
+        Initialize generator
+
+        Args:
+            config: Configuration dict (optional, uses defaults if None)
+            config_path: Path to config file (optional)
+        """
+        if config_path:
+            self.config_path = Path(config_path)
+            self.config = self._load_config()
+        else:
+            self.config = config or DEFAULT_CONFIG
+            self.config_path = None
+
         self.template_dir = Path(__file__).parent.parent / "templates"
 
     def _load_config(self) -> Dict[str, Any]:
-        """Load project configuration"""
+        """Load project configuration from file"""
         import yaml
         with open(self.config_path, 'r', encoding='utf-8') as f:
             return yaml.safe_load(f)
 
-    def generate(self, output_dir: str = ".", interactive: bool = True):
+    def generate(self, output_dir: str = "."):
         """
         Generate a project
 
         Args:
             output_dir: Output directory (default: current directory)
-            interactive: Enable interactive prompts (default: True)
         """
         output_path = Path(output_dir) / self.config['project']['name']
 
         self._print_header()
-
-        # Auto-copy configuration files to current directory if interactive
-        if interactive:
-            self._auto_setup_config_files()
 
         # Create output directory
         if not output_path.exists():
@@ -92,67 +162,11 @@ class ProjectGenerator:
         print("💡 提示:")
         print("   - API 文档: http://localhost:8000/docs")
         print("   - 配置文件: config/application.yaml, config/providers.yaml")
+        print()
+        print("⚙️  自定义配置:")
+        print("   - 修改 config/providers.yaml 选择向量数据库/LLM提供商")
+        print("   - 修改 config/application.yaml 调整应用设置")
         print("=" * 60)
-
-    def _auto_setup_config_files(self):
-        """
-        Automatically copy configuration files to current directory
-        This reduces manual work for users
-        """
-        print()
-        print("📋 自动配置文件设置")
-        print("-" * 40)
-
-        config_filename = f"{self.config['project']['name']}_config.yaml"
-
-        # Check if user config file exists in current directory
-        if os.path.exists(config_filename):
-            print(f"✅ 检测到现有配置文件: {config_filename}")
-            print(f"   将使用现有配置生成项目")
-            print()
-            return
-
-        # Check if project_config.yaml.example exists in current directory
-        example_config = "project_config.yaml.example"
-        if os.path.exists(example_config):
-            print(f"✅ 配置示例文件已存在: {example_config}")
-            print(f"   您可以直接编辑此文件，然后使用以下命令:")
-            print()
-            print(f"   👉 编辑配置:")
-            print(f"       notepad {example_config}")
-            print()
-            print(f"   👉 生成项目:")
-            print(f"       python scripts/generate_project.py {example_config}")
-            print()
-            print("📝 配置说明:")
-            print("   project:")
-            print("     name: my-chatbot")
-            print("     vector_db:")
-            print("       provider: weaviate  # weaviate, qdrant, pinecone")
-            print("     llm:")
-            print("       provider: openai  # openai, anthropic, azure")
-            print("       base_url: https://api.siliconflow.cn/v1  # 可选")
-            print("       model: gpt-4o")
-            print("     search:")
-            print("       provider: duckduckgo  # duckduckgo, tavily")
-            print()
-            print("💡 可用配置选项:")
-            print("   向量数据库: weaviate, qdrant, pinecone")
-            print("   LLM提供商: openai, anthropic, azure")
-            print("   搜索工具: duckduckgo, tavily")
-            print()
-            print("✨ 配置完成! 现在可以:")
-            print("   1. 编辑配置文件")
-            print("   2. 运行: python scripts/generate_project.py {example_config}")
-            print()
-            return
-
-        # Auto-copy the example config file
-        print("⚡ 正在复制配置文件到当前目录...")
-        shutil.copy2(self.config_path, config_filename)
-        print(f"✅ 已创建: {config_filename}")
-        print(f"   请编辑此文件来配置您的项目")
-        print()
 
     def _generate_main_files(self, output_path: Path):
         """Generate main project files"""
@@ -437,42 +451,39 @@ def main():
     """Main entry point"""
     parser = argparse.ArgumentParser(
         description="生成 RAG 聊天机器人项目",
-        epilog="示例: python scripts/generate_project.py my_config.yaml"
+        epilog="示例: python scripts/generate_project.py [config.yaml]"
     )
     parser.add_argument(
         "config",
         nargs="?",
-        default="project_config.yaml.example",
-        help="项目配置文件路径 (默认: project_config.yaml.example)"
+        default=None,
+        help="项目配置文件路径 (可选，默认使用内置默认配置)"
     )
     parser.add_argument(
         "-o", "--output",
         default=".",
         help="输出目录 (默认: 当前目录)"
     )
-    parser.add_argument(
-        "-n", "--no-interactive",
-        action="store_true",
-        help="禁用交互式提示 (用于自动化)"
-    )
 
     args = parser.parse_args()
 
-    # Check if config file exists
-    if not os.path.exists(args.config):
-        print(f"❌ 错误: 配置文件未找到: {args.config}")
-        print()
-        print("💡 提示: 首次使用会自动创建配置文件")
-        print("💡 可用配置文件: project_config.yaml.example (在项目根目录)")
-        print("💡 可用选项:")
-        print("   vector_db: weaviate, qdrant, pinecone")
-        print("   llm: openai, anthropic, azure")
-        print("   search: duckduckgo, tavily")
-        return 1
+    # Create generator with or without config file
+    if args.config and os.path.exists(args.config):
+        # Use provided config file
+        generator = ProjectGenerator(config_path=args.config)
+    else:
+        # Use default configuration
+        if args.config:
+            print(f"⚠️  配置文件未找到: {args.config}")
+            print(f"📋 使用默认配置生成项目...")
+            print()
+        else:
+            print(f"📋 使用默认配置生成项目...")
+            print()
 
-    # Create generator and run
-    generator = ProjectGenerator(args.config)
-    generator.generate(args.output, interactive=not args.no_interactive)
+        generator = ProjectGenerator(config=DEFAULT_CONFIG)
+
+    generator.generate(args.output)
 
     return 0
 
